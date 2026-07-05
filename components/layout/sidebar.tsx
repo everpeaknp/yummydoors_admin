@@ -9,6 +9,7 @@ const items = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
   { href: "/categories", label: "Categories", icon: Shapes },
   { href: "/restaurants", label: "Restaurants", icon: Store },
+  { href: "/merchant-applications", label: "Merchant Approvals", icon: Store },
   { href: "/menu-items", label: "Menu Items", icon: Blocks },
   { href: "/promos", label: "Promos", icon: Tag }
 ];

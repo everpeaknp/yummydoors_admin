@@ -4,6 +4,7 @@ import { useEffect, useState, useTransition } from "react";
 
 import { ResourceCard } from "@/components/admin/resource-card";
 import { SectionHeader } from "@/components/admin/section-header";
+import { ImageUpload } from "@/components/admin/image-upload";
 import type { ApiResponse, Category, Restaurant } from "@/lib/types";
 
 const defaultForm = {
@@ -93,14 +94,28 @@ export default function RestaurantsPage() {
           description="Create restaurant records directly in Doors while merchant onboarding and POS import are still being expanded."
         />
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          <input className="rounded-2xl border border-line px-4 py-3" placeholder="Restaurant name" value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} />
-          <input className="rounded-2xl border border-line px-4 py-3" placeholder="Slug" value={form.slug} onChange={(event) => setForm((current) => ({ ...current, slug: event.target.value }))} />
-          <input className="rounded-2xl border border-line px-4 py-3" placeholder="Cuisine label" value={form.primary_cuisine_label} onChange={(event) => setForm((current) => ({ ...current, primary_cuisine_label: event.target.value }))} />
+          <input className="rounded-2xl border border-line px-4 py-3" placeholder="Restaurant name" value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value, slug: event.target.value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") }))} />
+          <input className="rounded-2xl border border-line px-4 py-3" placeholder="Slug (auto-generated)" value={form.slug} onChange={(event) => setForm((current) => ({ ...current, slug: event.target.value }))} />
+          <div className="md:col-span-2 xl:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <ImageUpload 
+              value={form.cover_image_url} 
+              onChange={(url) => setForm(current => ({ ...current, cover_image_url: url }))} 
+              folder="restaurants" 
+              placeholder="Upload Cover Image"
+              helperText="Recommended: 16:9 ratio (e.g., 1200x675px)"
+            />
+            <ImageUpload 
+              value={form.logo_url} 
+              onChange={(url) => setForm(current => ({ ...current, logo_url: url }))} 
+              folder="restaurants" 
+              placeholder="Upload Logo (Optional)"
+              helperText="Recommended: 1:1 ratio (e.g., 400x400px)"
+            />
+          </div>
+          <input className="rounded-2xl border border-line px-4 py-3" placeholder="Primary cuisine (e.g. Italian)" value={form.primary_cuisine_label} onChange={(event) => setForm((current) => ({ ...current, primary_cuisine_label: event.target.value }))} />
           <input className="rounded-2xl border border-line px-4 py-3" placeholder="City" value={form.city} onChange={(event) => setForm((current) => ({ ...current, city: event.target.value }))} />
           <input className="rounded-2xl border border-line px-4 py-3" placeholder="Area" value={form.area} onChange={(event) => setForm((current) => ({ ...current, area: event.target.value }))} />
           <input className="rounded-2xl border border-line px-4 py-3" placeholder="Sort rank" type="number" value={form.sort_rank} onChange={(event) => setForm((current) => ({ ...current, sort_rank: Number(event.target.value) }))} />
-          <input className="rounded-2xl border border-line px-4 py-3 md:col-span-2" placeholder="Logo URL" value={form.logo_url} onChange={(event) => setForm((current) => ({ ...current, logo_url: event.target.value }))} />
-          <input className="rounded-2xl border border-line px-4 py-3 md:col-span-2" placeholder="Cover image URL" value={form.cover_image_url} onChange={(event) => setForm((current) => ({ ...current, cover_image_url: event.target.value }))} />
           <textarea className="rounded-2xl border border-line px-4 py-3 md:col-span-3" placeholder="Short description" value={form.short_description} onChange={(event) => setForm((current) => ({ ...current, short_description: event.target.value }))} />
         </div>
         <div className="mt-5 rounded-3xl border border-line p-4">

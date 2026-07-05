@@ -4,6 +4,7 @@ import { useEffect, useState, useTransition } from "react";
 
 import { ResourceCard } from "@/components/admin/resource-card";
 import { SectionHeader } from "@/components/admin/section-header";
+import { ImageUpload } from "@/components/admin/image-upload";
 import type { ApiResponse, Category, MenuItem, Restaurant } from "@/lib/types";
 
 const defaultForm = {
@@ -95,15 +96,23 @@ export default function MenuItemsPage() {
               <option key={category.id} value={category.id}>{category.name}</option>
             ))}
           </select>
-          <select className="rounded-2xl border border-line px-4 py-3" value={form.food_type} onChange={(event) => setForm((current) => ({ ...current, food_type: event.target.value as "veg" | "non_veg" | "vegan" }))}>
+          <input className="rounded-2xl border border-line px-4 py-3" placeholder="Menu item name" value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value, slug: event.target.value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") }))} />
+          <input className="rounded-2xl border border-line px-4 py-3" placeholder="Slug (auto-generated)" value={form.slug} onChange={(event) => setForm((current) => ({ ...current, slug: event.target.value }))} />
+          <input className="rounded-2xl border border-line px-4 py-3" placeholder="Price (NPR)" type="number" step="0.01" value={form.price} onChange={(event) => setForm((current) => ({ ...current, price: Number(event.target.value) }))} />
+          <div className="md:col-span-2 xl:col-span-3">
+            <ImageUpload 
+              value={form.image_url} 
+              onChange={(url) => setForm(current => ({ ...current, image_url: url }))} 
+              folder="menu-items" 
+              placeholder="Upload Menu Item Image"
+              helperText="Recommended: 1:1 ratio (e.g., 600x600px)"
+            />
+          </div>
+          <select className="rounded-2xl border border-line px-4 py-3" value={form.food_type} onChange={(event) => setForm((current) => ({ ...current, food_type: event.target.value as MenuItem["food_type"] }))}>
             <option value="veg">Veg</option>
             <option value="non_veg">Non veg</option>
             <option value="vegan">Vegan</option>
           </select>
-          <input className="rounded-2xl border border-line px-4 py-3" placeholder="Slug" value={form.slug} onChange={(event) => setForm((current) => ({ ...current, slug: event.target.value }))} />
-          <input className="rounded-2xl border border-line px-4 py-3" placeholder="Name" value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} />
-          <input className="rounded-2xl border border-line px-4 py-3" placeholder="Price" type="number" value={form.price} onChange={(event) => setForm((current) => ({ ...current, price: Number(event.target.value) }))} />
-          <input className="rounded-2xl border border-line px-4 py-3 md:col-span-2" placeholder="Image URL" value={form.image_url} onChange={(event) => setForm((current) => ({ ...current, image_url: event.target.value }))} />
           <textarea className="rounded-2xl border border-line px-4 py-3 md:col-span-3" placeholder="Description" value={form.description} onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))} />
         </div>
         <div className="mt-5 flex flex-wrap gap-3">

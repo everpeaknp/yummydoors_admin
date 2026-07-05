@@ -4,6 +4,7 @@ import { useEffect, useState, useTransition } from "react";
 
 import { ResourceCard } from "@/components/admin/resource-card";
 import { SectionHeader } from "@/components/admin/section-header";
+import { ImageUpload } from "@/components/admin/image-upload";
 import type { ApiResponse, Category } from "@/lib/types";
 
 const defaultForm = {
@@ -62,10 +63,18 @@ export default function CategoriesPage() {
           description="Use this first before merchant tooling exists. These categories drive homepage grouping and restaurant organization."
         />
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          <input className="rounded-2xl border border-line px-4 py-3" placeholder="Slug" value={form.slug} onChange={(event) => setForm((current) => ({ ...current, slug: event.target.value }))} />
-          <input className="rounded-2xl border border-line px-4 py-3" placeholder="Name" value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} />
-          <input className="rounded-2xl border border-line px-4 py-3" placeholder="Icon URL" value={form.icon_url} onChange={(event) => setForm((current) => ({ ...current, icon_url: event.target.value }))} />
+          <input className="rounded-2xl border border-line px-4 py-3" placeholder="Category name" value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value, slug: event.target.value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") }))} />
+          <input className="rounded-2xl border border-line px-4 py-3" placeholder="Slug (auto-generated)" value={form.slug} onChange={(event) => setForm((current) => ({ ...current, slug: event.target.value }))} />
           <input className="rounded-2xl border border-line px-4 py-3" placeholder="Sort order" type="number" value={form.sort_order} onChange={(event) => setForm((current) => ({ ...current, sort_order: Number(event.target.value) }))} />
+          <div className="md:col-span-2 xl:col-span-3">
+            <ImageUpload 
+              value={form.icon_url} 
+              onChange={(url) => setForm(current => ({ ...current, icon_url: url }))} 
+              folder="categories" 
+              placeholder="Upload Category Icon"
+              helperText="Recommended: Transparent PNG, 1:1 ratio (e.g., 200x200px)"
+            />
+          </div>
           <label className="flex items-center gap-3 rounded-2xl border border-line px-4 py-3"><input type="checkbox" checked={form.is_featured} onChange={(event) => setForm((current) => ({ ...current, is_featured: event.target.checked }))} />Featured</label>
           <label className="flex items-center gap-3 rounded-2xl border border-line px-4 py-3"><input type="checkbox" checked={form.is_active} onChange={(event) => setForm((current) => ({ ...current, is_active: event.target.checked }))} />Active</label>
         </div>

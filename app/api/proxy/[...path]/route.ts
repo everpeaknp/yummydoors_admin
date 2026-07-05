@@ -28,7 +28,12 @@ async function proxy(request: NextRequest, path: string[]) {
   };
 
   if (!["GET", "HEAD"].includes(request.method)) {
-    init.body = await request.text();
+    if (contentType?.includes("multipart/form-data")) {
+      init.body = await request.formData();
+      headers.delete("Content-Type"); // Let fetch regenerate the boundary
+    } else {
+      init.body = await request.text();
+    }
   }
 
   const backendResponse = await fetch(url, init);

@@ -82,6 +82,7 @@ export type Promo = {
   title: string;
   subtitle: string | null;
   image_url: string;
+  image_url_mobile: string | null;
   placement: "home_carousel" | "home_banner";
   target_type: "restaurant" | "category" | "menu_item" | "url" | "none";
   target_id: number | null;
