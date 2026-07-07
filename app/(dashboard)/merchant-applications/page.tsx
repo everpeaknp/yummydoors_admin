@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { ResourceCard } from "@/components/admin/resource-card";
 import { SectionHeader } from "@/components/admin/section-header";
+import { extractErrorMessage } from "@/lib/errors";
 import type { ApiResponse } from "@/lib/types";
 
 // Types matching the backend schema
@@ -40,6 +42,7 @@ type MerchantApplication = {
 };
 
 export default function MerchantApplicationsPage() {
+  const router = useRouter();
   const [items, setItems] = useState<MerchantApplication[]>([]);
   const [loading, setLoading] = useState(true);
   const [pending, startTransition] = useTransition();
@@ -50,13 +53,26 @@ export default function MerchantApplicationsPage() {
 
   async function load() {
     setLoading(true);
+    setMessage(null);
     try {
       const response = await fetch("/api/proxy/admin/merchant-applications", { cache: "no-store" });
-      const payload: ApiResponse<MerchantApplication[]> = await response.json();
+      const payload: ApiResponse<MerchantApplication[]> & { detail?: unknown; message?: unknown } = await response.json();
+      if (response.status === 401) {
+        router.replace("/login");
+        router.refresh();
+        return;
+      }
+      if (!response.ok) {
+        throw new Error(extractErrorMessage(payload, "Failed to load merchant applications."));
+      }
       setItems(payload.data ?? []);
     } catch (e) {
       console.error(e);
-      setMessage({ text: "Failed to load merchant applications.", isError: true });
+      setItems([]);
+      setMessage({
+        text: e instanceof Error ? e.message : "Failed to load merchant applications.",
+        isError: true,
+      });
     } finally {
       setLoading(false);
     }
@@ -79,7 +95,7 @@ export default function MerchantApplicationsPage() {
         const payload = await response.json();
         
         if (!response.ok) {
-          setMessage({ text: payload?.detail ?? `Unable to ${type} application.`, isError: true });
+          setMessage({ text: extractErrorMessage(payload, `Unable to ${type} application.`), isError: true });
           return;
         }
         

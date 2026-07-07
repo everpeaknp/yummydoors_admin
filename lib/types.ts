@@ -93,3 +93,56 @@ export type Promo = {
   start_at: string | null;
   end_at: string | null;
 };
+
+export type RestaurantTableSummary = {
+  id: number;
+  code: string;
+  label: string;
+  zone: string | null;
+  min_guest_count: number;
+  max_guest_count: number;
+  seat_capacity: number;
+  category: string;
+  status: string;
+  sort_order: number;
+};
+
+export type ReservationStatus =
+  | "pending"
+  | "confirmed"
+  | "seated"
+  | "completed"
+  | "cancelled"
+  | "no_show";
+
+export type ReservationStatusEvent = {
+  status: ReservationStatus;
+  note: string | null;
+  created_at: string;
+};
+
+export type Reservation = {
+  id: number;
+  reservation_code: string;
+  status: ReservationStatus;
+  restaurant_id: number;
+  restaurant_name: string;
+  restaurant_slug: string;
+  restaurant_logo_url: string | null;
+  reservation_date: string;
+  reservation_time: string;
+  guest_count: number;
+  contact_name: string;
+  contact_phone: string;
+  contact_email: string | null;
+  occasion: string | null;
+  special_request: string | null;
+  cancellation_reason: string | null;
+  source: string;
+  selected_table: RestaurantTableSummary | null;
+  selected_table_label: string | null;
+  selected_table_zone: string | null;
+  created_at: string;
+  updated_at: string;
+  status_events: ReservationStatusEvent[];
+};

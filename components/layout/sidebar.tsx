@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Blocks, LayoutDashboard, Shapes, Store, Tag } from "lucide-react";
+import { Blocks, CalendarDays, LayoutDashboard, Shapes, Store, Tag } from "lucide-react";
 import clsx from "clsx";
 
 const items = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
   { href: "/categories", label: "Categories", icon: Shapes },
   { href: "/restaurants", label: "Restaurants", icon: Store },
+  { href: "/reservations", label: "Reservations", icon: CalendarDays },
   { href: "/merchant-applications", label: "Merchant Approvals", icon: Store },
   { href: "/menu-items", label: "Menu Items", icon: Blocks },
   { href: "/promos", label: "Promos", icon: Tag }

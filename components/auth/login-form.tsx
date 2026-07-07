@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { extractErrorMessage } from "@/lib/errors";
 
 export function LoginForm() {
   const router = useRouter();
@@ -22,7 +23,7 @@ export function LoginForm() {
 
       const payload = await response.json().catch(() => null);
       if (!response.ok) {
-        setError(payload?.detail ?? payload?.message ?? "Unable to sign in.");
+        setError(extractErrorMessage(payload, "Unable to sign in."));
         return;
       }
 

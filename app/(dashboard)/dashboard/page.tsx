@@ -19,6 +19,11 @@ const cards = [
     description: "Seed or correct restaurant menus while POS ingestion is still being built."
   },
   {
+    href: "/reservations",
+    title: "Reservations",
+    description: "Oversee booking queues and table inventory before merchant tooling is fully rolled out."
+  },
+  {
     href: "/promos",
     title: "Promos",
     description: "Control homepage banners and destination routing from the same console."

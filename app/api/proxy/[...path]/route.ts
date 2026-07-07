@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { ACCESS_COOKIE, getBackendUrl } from "@/lib/config";
+import { ACCESS_COOKIE, REFRESH_COOKIE, USER_COOKIE, getBackendUrl } from "@/lib/config";
 
 async function proxy(request: NextRequest, path: string[]) {
   const token = request.cookies.get(ACCESS_COOKIE)?.value;
@@ -38,6 +38,19 @@ async function proxy(request: NextRequest, path: string[]) {
 
   const backendResponse = await fetch(url, init);
   const text = await backendResponse.text();
+
+  if (backendResponse.status === 401) {
+    const response = new NextResponse(text, {
+      status: backendResponse.status,
+      headers: {
+        "Content-Type": backendResponse.headers.get("content-type") ?? "application/json"
+      }
+    });
+    response.cookies.delete(ACCESS_COOKIE);
+    response.cookies.delete(REFRESH_COOKIE);
+    response.cookies.delete(USER_COOKIE);
+    return response;
+  }
 
   return new NextResponse(text, {
     status: backendResponse.status,

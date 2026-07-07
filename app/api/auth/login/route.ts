@@ -19,7 +19,7 @@ function isLoginResponse(
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
-  const backendResponse = await fetch(`${getBackendUrl()}/api/v1/auth/login`, {
+  const backendResponse = await fetch(`${getBackendUrl()}/api/v1/auth/admin/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -38,13 +38,10 @@ export async function POST(request: NextRequest) {
   if (!isLoginResponse(payload)) {
     return NextResponse.json({ detail: "Login response was invalid." }, { status: 502 });
   }
-
-  const user = payload.data.user;
-  const isSuperAdmin = user?.roles.some((role) => role.code === "super_admin");
-  if (!isSuperAdmin || !payload.data.tokens.access_token || !payload.data.tokens.refresh_token) {
+  if (!payload.data.tokens.access_token || !payload.data.tokens.refresh_token) {
     return NextResponse.json(
-      { detail: "This account does not have super-admin access." },
-      { status: 403 }
+      { detail: "Login response was incomplete." },
+      { status: 502 }
     );
   }
 
