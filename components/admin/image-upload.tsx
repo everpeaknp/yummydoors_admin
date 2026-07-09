@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, ChangeEvent } from "react";
+import Image from "next/image";
 import { UploadCloud, X, Loader2, Image as ImageIcon } from "lucide-react";
 import clsx from "clsx";
 
@@ -40,9 +41,9 @@ export function ImageUpload({
     try {
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("folder", folder);
+      formData.append("folder_type", folder);
 
-      const res = await fetch("/api/proxy/admin/upload", {
+      const res = await fetch("/api/proxy/media/upload", {
         method: "POST",
         body: formData,
       });
@@ -81,11 +82,11 @@ export function ImageUpload({
       
       {value ? (
         <div className="relative group overflow-hidden rounded-2xl border border-line bg-wash w-full h-48">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img 
+          <Image
+            fill
             src={value} 
             alt="Uploaded" 
-            className="w-full h-full object-contain"
+            className="object-contain"
           />
           <div className="absolute inset-0 bg-ink/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
             <button
