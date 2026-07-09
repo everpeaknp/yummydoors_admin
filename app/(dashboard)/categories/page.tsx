@@ -8,6 +8,7 @@ import { ImageUpload } from "@/components/admin/image-upload";
 import type { ApiResponse, Category } from "@/lib/types";
 
 const defaultForm = {
+  id: undefined as number | undefined,
   slug: "",
   name: "",
   icon_url: "",
@@ -35,23 +36,42 @@ export default function CategoriesPage() {
   function submit() {
     startTransition(async () => {
       setMessage(null);
-      const response = await fetch("/api/proxy/admin/categories", {
-        method: "POST",
+      const url = form.id ? `/api/proxy/admin/categories/${form.id}` : "/api/proxy/admin/categories";
+      const method = form.id ? "PUT" : "POST";
+      const response = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...form,
+          name: form.name,
+          slug: form.slug,
+          sort_order: form.sort_order,
+          is_featured: form.is_featured,
+          is_active: form.is_active,
           icon_url: form.icon_url || null
         })
       });
       const payload = await response.json();
       if (!response.ok) {
-        setMessage(payload?.detail ?? "Unable to create category.");
+        setMessage(payload?.detail ?? (form.id ? "Unable to update category." : "Unable to create category."));
         return;
       }
       setForm(defaultForm);
-      setMessage("Category created.");
+      setMessage(form.id ? "Category updated." : "Category created.");
       await load();
     });
+  }
+
+  function edit(item: Category) {
+    setForm({
+      id: item.id,
+      slug: item.slug,
+      name: item.name,
+      icon_url: item.icon_url || "",
+      sort_order: item.sort_order,
+      is_featured: item.is_featured,
+      is_active: item.is_active
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   return (
@@ -87,7 +107,19 @@ export default function CategoriesPage() {
       </div>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {items.map((item) => (
-          <ResourceCard key={item.id} title={item.name} meta={item.slug}>
+          <ResourceCard 
+            key={item.id} 
+            title={item.name} 
+            meta={item.slug}
+            action={
+              <button 
+                onClick={() => edit(item)} 
+                className="rounded bg-ink/10 px-3 py-1.5 text-xs font-semibold text-ink hover:bg-ink/20"
+              >
+                Edit
+              </button>
+            }
+          >
             <div className="space-y-2 text-sm text-mute">
               <p>Sort order: {item.sort_order}</p>
               <p>Featured: {item.is_featured ? "Yes" : "No"}</p>
