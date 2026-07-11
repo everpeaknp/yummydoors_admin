@@ -27,6 +27,16 @@ const cards = [
     href: "/promos",
     title: "Promos",
     description: "Control homepage banners and destination routing from the same console."
+  },
+  {
+    href: "/merchant-applications",
+    title: "Merchant Approvals",
+    description: "Review merchant onboarding requests and approve workspace creation."
+  },
+  {
+    href: "/rider-applications",
+    title: "Rider Approvals",
+    description: "Review rider applications and grant rider access on the same user account."
   }
 ];
 

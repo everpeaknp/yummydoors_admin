@@ -8,56 +8,66 @@ async function proxy(request: NextRequest, path: string[]) {
     return NextResponse.json({ detail: "Unauthorized." }, { status: 401 });
   }
 
-  const url = new URL(`${getBackendUrl()}/api/v1/${path.join("/")}`);
-  request.nextUrl.searchParams.forEach((value, key) => {
-    url.searchParams.set(key, value);
-  });
+  try {
+    const url = new URL(`${getBackendUrl()}/api/v1/${path.join("/")}`);
+    request.nextUrl.searchParams.forEach((value, key) => {
+      url.searchParams.set(key, value);
+    });
 
-  const headers = new Headers();
-  headers.set("Authorization", `Bearer ${token}`);
+    const headers = new Headers();
+    headers.set("Authorization", `Bearer ${token}`);
 
-  const contentType = request.headers.get("content-type");
-  if (contentType) {
-    headers.set("Content-Type", contentType);
-  }
-
-  const init: RequestInit = {
-    method: request.method,
-    headers,
-    cache: "no-store"
-  };
-
-  if (!["GET", "HEAD"].includes(request.method)) {
-    if (contentType?.includes("multipart/form-data")) {
-      init.body = await request.formData();
-      headers.delete("Content-Type"); // Let fetch regenerate the boundary
-    } else {
-      init.body = await request.text();
+    const contentType = request.headers.get("content-type");
+    if (contentType) {
+      headers.set("Content-Type", contentType);
     }
-  }
 
-  const backendResponse = await fetch(url, init);
-  const text = await backendResponse.text();
+    const init: RequestInit = {
+      method: request.method,
+      headers,
+      cache: "no-store"
+    };
 
-  if (backendResponse.status === 401) {
-    const response = new NextResponse(text, {
+    if (!["GET", "HEAD"].includes(request.method)) {
+      if (contentType?.includes("multipart/form-data")) {
+        init.body = await request.formData();
+        headers.delete("Content-Type"); // Let fetch regenerate the boundary
+      } else {
+        init.body = await request.text();
+      }
+    }
+
+    const backendResponse = await fetch(url, init);
+    const text = await backendResponse.text();
+
+    if (backendResponse.status === 401) {
+      const response = new NextResponse(text, {
+        status: backendResponse.status,
+        headers: {
+          "Content-Type": backendResponse.headers.get("content-type") ?? "application/json"
+        }
+      });
+      response.cookies.delete(ACCESS_COOKIE);
+      response.cookies.delete(REFRESH_COOKIE);
+      response.cookies.delete(USER_COOKIE);
+      return response;
+    }
+
+    return new NextResponse(text, {
       status: backendResponse.status,
       headers: {
         "Content-Type": backendResponse.headers.get("content-type") ?? "application/json"
       }
     });
-    response.cookies.delete(ACCESS_COOKIE);
-    response.cookies.delete(REFRESH_COOKIE);
-    response.cookies.delete(USER_COOKIE);
-    return response;
+  } catch (error) {
+    console.error("Admin proxy failed:", error);
+    return NextResponse.json(
+      {
+        detail: "Backend service is unavailable right now."
+      },
+      { status: 502 }
+    );
   }
-
-  return new NextResponse(text, {
-    status: backendResponse.status,
-    headers: {
-      "Content-Type": backendResponse.headers.get("content-type") ?? "application/json"
-    }
-  });
 }
 
 export async function GET(request: NextRequest, context: { params: { path: string[] } }) {

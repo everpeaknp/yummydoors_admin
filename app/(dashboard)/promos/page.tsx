@@ -5,6 +5,8 @@ import { useEffect, useState, useTransition } from "react";
 import { ResourceCard } from "@/components/admin/resource-card";
 import { SectionHeader } from "@/components/admin/section-header";
 import { ImageUpload } from "@/components/admin/image-upload";
+import { extractErrorMessage } from "@/lib/errors";
+import { readJsonPayload } from "@/lib/http";
 import type { ApiResponse, Promo } from "@/lib/types";
 
 const defaultForm = {
@@ -29,9 +31,16 @@ export default function PromosPage() {
   const [pending, startTransition] = useTransition();
 
   async function load() {
-    const response = await fetch("/api/proxy/admin/promos", { cache: "no-store" });
-    const payload: ApiResponse<Promo[]> = await response.json();
-    setItems(payload.data ?? []);
+    try {
+      const response = await fetch("/api/proxy/admin/promos", { cache: "no-store" });
+      const payload = await readJsonPayload<ApiResponse<Promo[]>>(response);
+      if (!response.ok) {
+        throw new Error(extractErrorMessage(payload, "Failed to load promos."));
+      }
+      setItems(payload?.data ?? []);
+    } catch {
+      setItems([]);
+    }
   }
 
   useEffect(() => {
@@ -55,9 +64,9 @@ export default function PromosPage() {
           cta_text: form.cta_text || null
         })
       });
-      const payload = await response.json();
+      const payload = await readJsonPayload(response);
       if (!response.ok) {
-        setMessage(payload?.detail ?? "Unable to save promo.");
+        setMessage(extractErrorMessage(payload, "Unable to save promo."));
         return;
       }
       setForm(defaultForm);

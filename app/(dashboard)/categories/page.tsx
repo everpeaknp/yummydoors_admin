@@ -5,6 +5,8 @@ import { useEffect, useState, useTransition } from "react";
 import { ResourceCard } from "@/components/admin/resource-card";
 import { SectionHeader } from "@/components/admin/section-header";
 import { ImageUpload } from "@/components/admin/image-upload";
+import { extractErrorMessage } from "@/lib/errors";
+import { readJsonPayload } from "@/lib/http";
 import type { ApiResponse, Category } from "@/lib/types";
 
 const defaultForm = {
@@ -24,9 +26,17 @@ export default function CategoriesPage() {
   const [pending, startTransition] = useTransition();
 
   async function load() {
-    const response = await fetch("/api/proxy/admin/categories", { cache: "no-store" });
-    const payload: ApiResponse<Category[]> = await response.json();
-    setItems(payload.data ?? []);
+    try {
+      const response = await fetch("/api/proxy/admin/categories", { cache: "no-store" });
+      const payload = await readJsonPayload<ApiResponse<Category[]>>(response);
+      if (!response.ok) {
+        throw new Error(extractErrorMessage(payload, "Failed to load categories."));
+      }
+      setItems(payload?.data ?? []);
+    } catch (caught) {
+      setItems([]);
+      setMessage(caught instanceof Error ? caught.message : "Failed to load categories.");
+    }
   }
 
   useEffect(() => {
@@ -50,9 +60,11 @@ export default function CategoriesPage() {
           icon_url: form.icon_url || null
         })
       });
-      const payload = await response.json();
+      const payload = await readJsonPayload(response);
       if (!response.ok) {
-        setMessage(payload?.detail ?? (form.id ? "Unable to update category." : "Unable to create category."));
+        setMessage(
+          extractErrorMessage(payload, form.id ? "Unable to update category." : "Unable to create category.")
+        );
         return;
       }
       setForm(defaultForm);
@@ -69,7 +81,7 @@ export default function CategoriesPage() {
       icon_url: item.icon_url || "",
       sort_order: item.sort_order,
       is_featured: item.is_featured,
-      is_active: item.is_active
+      is_active: Boolean(item.is_active)
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }

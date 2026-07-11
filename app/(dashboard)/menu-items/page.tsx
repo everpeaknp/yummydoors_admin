@@ -5,9 +5,27 @@ import { useEffect, useState, useTransition } from "react";
 import { ResourceCard } from "@/components/admin/resource-card";
 import { SectionHeader } from "@/components/admin/section-header";
 import { ImageUpload } from "@/components/admin/image-upload";
+import { extractErrorMessage } from "@/lib/errors";
+import { readJsonPayload } from "@/lib/http";
 import type { ApiResponse, Category, MenuItem, Restaurant } from "@/lib/types";
 
-const defaultForm = {
+type MenuItemForm = {
+  restaurant_id: number;
+  category_id: number;
+  slug: string;
+  name: string;
+  description: string;
+  image_url: string;
+  price: number;
+  currency_code: string;
+  food_type: MenuItem["food_type"];
+  is_available: boolean;
+  is_spicy: boolean;
+  is_featured: boolean;
+  is_popular: boolean;
+};
+
+const defaultForm: MenuItemForm = {
   restaurant_id: 0,
   category_id: 0,
   slug: "",
@@ -27,24 +45,40 @@ export default function MenuItemsPage() {
   const [items, setItems] = useState<MenuItem[]>([]);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [form, setForm] = useState(defaultForm);
+  const [form, setForm] = useState<MenuItemForm>(defaultForm);
   const [message, setMessage] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   async function load() {
-    const [itemsResponse, restaurantsResponse, categoriesResponse] = await Promise.all([
-      fetch("/api/proxy/admin/menu-items", { cache: "no-store" }),
-      fetch("/api/proxy/admin/restaurants", { cache: "no-store" }),
-      fetch("/api/proxy/admin/categories", { cache: "no-store" })
-    ]);
+    try {
+      const [itemsResponse, restaurantsResponse, categoriesResponse] = await Promise.all([
+        fetch("/api/proxy/admin/menu-items", { cache: "no-store" }),
+        fetch("/api/proxy/admin/restaurants", { cache: "no-store" }),
+        fetch("/api/proxy/admin/categories", { cache: "no-store" })
+      ]);
 
-    const itemsPayload: ApiResponse<MenuItem[]> = await itemsResponse.json();
-    const restaurantsPayload: ApiResponse<Restaurant[]> = await restaurantsResponse.json();
-    const categoriesPayload: ApiResponse<Category[]> = await categoriesResponse.json();
+      const itemsPayload = await readJsonPayload<ApiResponse<MenuItem[]>>(itemsResponse);
+      const restaurantsPayload = await readJsonPayload<ApiResponse<Restaurant[]>>(restaurantsResponse);
+      const categoriesPayload = await readJsonPayload<ApiResponse<Category[]>>(categoriesResponse);
 
-    setItems(itemsPayload.data ?? []);
-    setRestaurants(restaurantsPayload.data ?? []);
-    setCategories(categoriesPayload.data ?? []);
+      if (!itemsResponse.ok) {
+        throw new Error(extractErrorMessage(itemsPayload, "Failed to load menu items."));
+      }
+      if (!restaurantsResponse.ok) {
+        throw new Error(extractErrorMessage(restaurantsPayload, "Failed to load restaurants."));
+      }
+      if (!categoriesResponse.ok) {
+        throw new Error(extractErrorMessage(categoriesPayload, "Failed to load categories."));
+      }
+
+      setItems(itemsPayload?.data ?? []);
+      setRestaurants(restaurantsPayload?.data ?? []);
+      setCategories(categoriesPayload?.data ?? []);
+    } catch {
+      setItems([]);
+      setRestaurants([]);
+      setCategories([]);
+    }
   }
 
   useEffect(() => {
@@ -64,9 +98,9 @@ export default function MenuItemsPage() {
           description: form.description || null
         })
       });
-      const payload = await response.json();
+      const payload = await readJsonPayload(response);
       if (!response.ok) {
-        setMessage(payload?.detail ?? "Unable to create menu item.");
+        setMessage(extractErrorMessage(payload, "Unable to create menu item."));
         return;
       }
       setForm(defaultForm);
@@ -108,7 +142,16 @@ export default function MenuItemsPage() {
               helperText="Recommended: 1:1 ratio (e.g., 600x600px)"
             />
           </div>
-          <select className="rounded-2xl border border-line px-4 py-3" value={form.food_type} onChange={(event) => setForm((current) => ({ ...current, food_type: event.target.value as MenuItem["food_type"] }))}>
+          <select
+            className="rounded-2xl border border-line px-4 py-3"
+            value={form.food_type ?? "veg"}
+            onChange={(event) =>
+              setForm((current) => ({
+                ...current,
+                food_type: event.target.value as MenuItem["food_type"]
+              }))
+            }
+          >
             <option value="veg">Veg</option>
             <option value="non_veg">Non veg</option>
             <option value="vegan">Vegan</option>

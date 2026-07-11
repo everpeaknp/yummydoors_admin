@@ -5,6 +5,8 @@ import { useEffect, useState, useTransition } from "react";
 import { ResourceCard } from "@/components/admin/resource-card";
 import { SectionHeader } from "@/components/admin/section-header";
 import { ImageUpload } from "@/components/admin/image-upload";
+import { extractErrorMessage } from "@/lib/errors";
+import { readJsonPayload } from "@/lib/http";
 import type { ApiResponse, Category, Restaurant } from "@/lib/types";
 
 const defaultForm = {
@@ -33,16 +35,28 @@ export default function RestaurantsPage() {
   const [pending, startTransition] = useTransition();
 
   async function load() {
-    const [restaurantsResponse, categoriesResponse] = await Promise.all([
-      fetch("/api/proxy/admin/restaurants", { cache: "no-store" }),
-      fetch("/api/proxy/admin/categories", { cache: "no-store" })
-    ]);
+    try {
+      const [restaurantsResponse, categoriesResponse] = await Promise.all([
+        fetch("/api/proxy/admin/restaurants", { cache: "no-store" }),
+        fetch("/api/proxy/admin/categories", { cache: "no-store" })
+      ]);
 
-    const restaurantsPayload: ApiResponse<Restaurant[]> = await restaurantsResponse.json();
-    const categoriesPayload: ApiResponse<Category[]> = await categoriesResponse.json();
+      const restaurantsPayload = await readJsonPayload<ApiResponse<Restaurant[]>>(restaurantsResponse);
+      const categoriesPayload = await readJsonPayload<ApiResponse<Category[]>>(categoriesResponse);
 
-    setItems(restaurantsPayload.data ?? []);
-    setCategories(categoriesPayload.data ?? []);
+      if (!restaurantsResponse.ok) {
+        throw new Error(extractErrorMessage(restaurantsPayload, "Failed to load restaurants."));
+      }
+      if (!categoriesResponse.ok) {
+        throw new Error(extractErrorMessage(categoriesPayload, "Failed to load categories."));
+      }
+
+      setItems(restaurantsPayload?.data ?? []);
+      setCategories(categoriesPayload?.data ?? []);
+    } catch {
+      setItems([]);
+      setCategories([]);
+    }
   }
 
   useEffect(() => {
@@ -74,9 +88,9 @@ export default function RestaurantsPage() {
           short_description: form.short_description || null
         })
       });
-      const payload = await response.json();
+      const payload = await readJsonPayload(response);
       if (!response.ok) {
-        setMessage(payload?.detail ?? "Unable to create restaurant.");
+        setMessage(extractErrorMessage(payload, "Unable to create restaurant."));
         return;
       }
       setForm(defaultForm);
