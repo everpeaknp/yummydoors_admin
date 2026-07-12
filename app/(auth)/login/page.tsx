@@ -28,7 +28,7 @@ export default function LoginPage() {
             ))}
           </div>
         </section>
-        <section className="rounded-panel border border-line bg-panel p-8 shadow-panel">
+        <section className="">
           <div className="mx-auto max-w-md">
             <p className="font-mono text-xs uppercase tracking-[0.32em] text-accentDark">Super Admin Access</p>
             <h2 className="mt-5 text-4xl font-semibold text-ink">Sign in</h2>

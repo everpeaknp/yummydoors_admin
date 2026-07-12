@@ -113,7 +113,7 @@ export default function RiderApplicationsPage() {
 
   return (
     <main className="space-y-5">
-      <div className="rounded-panel border border-line bg-panel p-8 shadow-panel">
+      <div className="">
         <SectionHeader
           eyebrow="Approvals"
           title="Rider Applications"

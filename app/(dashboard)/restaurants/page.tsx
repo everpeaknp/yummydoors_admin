@@ -101,7 +101,7 @@ export default function RestaurantsPage() {
 
   return (
     <main className="space-y-5">
-      <div className="rounded-panel border border-line bg-panel p-8 shadow-panel">
+      <div className="">
         <SectionHeader
           eyebrow="Restaurants"
           title="External Restaurant Ingestion"

@@ -361,7 +361,7 @@ export default function ReservationsPage() {
 
   return (
     <main className="space-y-5">
-      <div className="rounded-panel border border-line bg-panel p-8 shadow-panel">
+      <div className="">
         <SectionHeader
           eyebrow="Reservations"
           title="Reservation Operations"
@@ -456,7 +456,7 @@ export default function ReservationsPage() {
 
       <div className="grid gap-5 xl:grid-cols-[1.1fr_0.9fr]">
         <div className="space-y-5">
-          <div className="rounded-panel border border-line bg-panel p-8 shadow-panel">
+          <div className="">
             <h3 className="text-xl font-semibold text-ink">Reservation Queue</h3>
             <p className="mt-2 text-sm text-mute">
               This is what the merchant desktop should see at restaurant level, now available here for super-admin fallback too.
@@ -500,7 +500,7 @@ export default function ReservationsPage() {
             </div>
           </div>
 
-          <div className="rounded-panel border border-line bg-panel p-8 shadow-panel">
+          <div className="">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <h3 className="text-xl font-semibold text-ink">Reservation Tables</h3>
@@ -531,7 +531,7 @@ export default function ReservationsPage() {
           </div>
         </div>
 
-        <div className="rounded-panel border border-line bg-panel p-8 shadow-panel">
+        <div className="">
           {selectedReservation ? (
             <div className="space-y-6">
               <div>
@@ -629,7 +629,7 @@ export default function ReservationsPage() {
 
       {tableModalOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 px-4 py-8">
-          <div className="w-full max-w-2xl rounded-panel border border-line bg-panel p-8 shadow-panel">
+          <div className="w-full max-w-2xl ">
             <SectionHeader
               eyebrow={editingTableId ? "Update Table" : "Create Table"}
               title={editingTableId ? "Refine this reservation table" : "Add a reservation table"}

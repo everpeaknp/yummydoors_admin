@@ -10,15 +10,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="min-h-screen p-5 lg:p-6">
-      <div className="grid gap-5 lg:grid-cols-[280px_minmax(0,1fr)]">
-        <div className="lg:sticky lg:top-6 lg:h-[calc(100vh-3rem)]">
-          <Sidebar />
-        </div>
-        <div className="space-y-5">
-          <Topbar userName={getUserName()} />
-          <div>{children}</div>
-        </div>
+    <div className="flex h-screen overflow-hidden bg-wash">
+      <Sidebar />
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <Topbar userName={getUserName()} />
+        <main className="flex-1 overflow-y-auto p-6">
+          {children}
+        </main>
       </div>
     </div>
   );

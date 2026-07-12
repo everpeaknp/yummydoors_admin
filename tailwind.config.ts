@@ -22,7 +22,7 @@ const config: Config = {
         panel: "0 24px 60px rgba(17, 18, 23, 0.08)"
       },
       borderRadius: {
-        panel: "28px"
+        panel: "12px"
       }
     }
   },

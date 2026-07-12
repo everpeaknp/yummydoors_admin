@@ -42,7 +42,7 @@ const cards = [
 
 export default function DashboardPage() {
   return (
-    <main className="rounded-panel border border-line bg-panel p-8 shadow-panel">
+    <main className="">
       <SectionHeader
         eyebrow="Overview"
         title="Admin Surface Ready"
@@ -53,10 +53,10 @@ export default function DashboardPage() {
           <Link
             key={card.href}
             href={card.href}
-            className="rounded-3xl border border-line bg-wash p-6 transition hover:border-accent"
+            className="rounded-lg border border-line bg-panel p-6 shadow-sm transition hover:border-accent"
           >
-            <h3 className="text-xl font-semibold text-ink">{card.title}</h3>
-            <p className="mt-3 text-sm leading-7 text-mute">{card.description}</p>
+            <h3 className="text-lg font-semibold text-ink">{card.title}</h3>
+            <p className="mt-2 text-sm leading-6 text-mute">{card.description}</p>
           </Link>
         ))}
       </div>
